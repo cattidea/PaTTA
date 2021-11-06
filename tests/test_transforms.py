@@ -1,3 +1,5 @@
+import cv2
+import numpy as np
 import paddle
 import patta as tta
 import pytest
@@ -50,7 +52,10 @@ def test_label_is_same(transform):
 
 @pytest.mark.parametrize(
     "transform",
-    [tta.HorizontalFlip(), tta.VerticalFlip()],
+    [
+        tta.HorizontalFlip(),
+        tta.VerticalFlip(),
+    ],
 )
 def test_flip_keypoints(transform):
     keypoints = paddle.to_tensor([[0.1, 0.1], [0.1, 0.9], [0.9, 0.1], [0.9, 0.9], [0.4, 0.3]])
@@ -193,3 +198,78 @@ def test_adjust_contrast_transform():
     for i, p in enumerate(transform.params):
         aug = transform.apply_aug_image(a, **{transform.pname: p})
         assert paddle.allclose(aug[0, 0], paddle.to_tensor(output[i], paddle.float32))
+
+
+def test_average_blur_transform():
+    transform = tta.AverageBlur(kernel_sizes=[(3, 3), (5, 7)])
+    img = np.random.randint(0, 255, size=(224, 224, 3)).astype(np.float32)
+
+    for i, kernel_size in enumerate(transform.params):
+        if isinstance(kernel_size, int):
+            kernel_size = (kernel_size, kernel_size)
+
+        if kernel_size == (1, 1):
+            img_aug_cv2 = img
+        else:
+            img_aug_cv2 = cv2.blur(img, kernel_size)
+
+        img_tensor = paddle.to_tensor(img).unsqueeze(0).transpose((0, 3, 1, 2))
+        img_tensor_aug = transform.apply_aug_image(img_tensor, kernel_size=kernel_size)
+        img_tensor_aug = img_tensor_aug.transpose((0, 2, 3, 1)).squeeze(0)
+        img_aug = img_tensor_aug.numpy()
+
+        pad = ((kernel_size[0] - 1) // 2, (kernel_size[1] - 1) // 2)
+        assert np.allclose(img_aug_cv2[pad[1] : -pad[1], pad[0] : -pad[0]], img_aug[pad[1] : -pad[1], pad[0] : -pad[0]])
+
+
+@pytest.mark.parametrize(
+    "sigma",
+    [
+        (0.3, 0.3),
+        (0.5, 0.7),
+    ],
+)
+def test_gaussian_blur_transform(sigma):
+    transform = tta.GaussianBlur(kernel_sizes=[(3, 3), (5, 7)], sigma=sigma)
+    img = np.random.randint(0, 255, size=(224, 224, 3)).astype(np.float32)
+
+    for i, kernel_size in enumerate(transform.params):
+        if isinstance(kernel_size, int):
+            kernel_size = (kernel_size, kernel_size)
+
+        if kernel_size == (1, 1):
+            img_aug_cv2 = img
+        else:
+            img_aug_cv2 = cv2.GaussianBlur(img, kernel_size, sigmaX=sigma[0], sigmaY=sigma[1])
+
+        img_tensor = paddle.to_tensor(img).unsqueeze(0).transpose((0, 3, 1, 2))
+        img_tensor_aug = transform.apply_aug_image(img_tensor, kernel_size=kernel_size)
+        img_tensor_aug = img_tensor_aug.transpose((0, 2, 3, 1)).squeeze(0)
+        img_aug = img_tensor_aug.numpy()
+
+        pad = ((kernel_size[0] - 1) // 2, (kernel_size[1] - 1) // 2)
+        assert np.allclose(img_aug_cv2[pad[1] : -pad[1], pad[0] : -pad[0]], img_aug[pad[1] : -pad[1], pad[0] : -pad[0]])
+
+
+def test_sharpen_transform():
+    transform = tta.Sharpen(kernel_sizes=[3, 5, 7])
+    img = (np.arange(224 * 224 * 3).reshape(224, 224, 3) / (224 * 224 * 3) * 240).astype(np.float32)
+    noise = np.random.randint(0, 5, size=(224, 224, 3)).astype(np.float32)
+    img += noise
+
+    for i, kernel_size in enumerate(transform.params):
+        if kernel_size == 1:
+            img_aug_cv2 = img
+        else:
+            img_laplacian_kernel = tta.functional.get_laplacian_kernel(kernel_size)
+            img_laplacian = cv2.filter2D(img, -1, img_laplacian_kernel)
+            img_aug_cv2 = cv2.addWeighted(img, 1, img_laplacian, -1, 0)
+            img_aug_cv2 = np.clip(img_aug_cv2, 0, 255)
+
+        img_tensor = paddle.to_tensor(img).unsqueeze(0).transpose((0, 3, 1, 2))
+        img_tensor_aug = transform.apply_aug_image(img_tensor, kernel_size=kernel_size)
+        img_tensor_aug = img_tensor_aug.transpose((0, 2, 3, 1)).squeeze(0)
+        img_aug = img_tensor_aug.numpy()
+
+        pad = (kernel_size - 1) // 2
+        assert np.allclose(img_aug_cv2[pad:-pad, pad:-pad], img_aug[pad:-pad, pad:-pad])
