@@ -204,6 +204,7 @@ def sharpen(x, kernel_size: int = 3):
         return x
     assert kernel_size > 0 and kernel_size % 2 == 1, "kernel_size both must be positive and odd"
     kernel = get_laplacian_kernel(kernel_size).astype(np.float32)
+    kernel = kernel.astype(np.float32)
     kernel = paddle.to_tensor(kernel)
     x_laplacian = filter2d(x, kernel)
     x = x - x_laplacian
