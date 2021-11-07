@@ -172,7 +172,7 @@ def adjust_contrast(x, contrast_factor=0.5):
         x = x.paddle.to_tensor(x).numpy()
     except:
         x = x.numpy()
-    x=x.clip(0,255).astype(np.uint8)
+    x = x.clip(0,255).astype(np.uint8)
     x = cv2.LUT(x, table)
     x = x.astype(np.float32)
     return paddle.to_tensor(x)
@@ -186,7 +186,7 @@ def adjust_brightness(x, brightness_factor=1):
         x = x.paddle.to_tensor(x).numpy()
     except:
         x = x.numpy()
-    x=x.clip(0,255).astype(np.uint8)
+    x = x.clip(0,255).astype(np.uint8)
     x = cv2.LUT(x, table)
     x = x.astype(np.float32)
     return paddle.to_tensor(x)
