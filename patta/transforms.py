@@ -327,6 +327,7 @@ class Pad(DualTransform):
         self.mode = mode,
         self.value = value,
         super().__init__("pads",pads)
+
     def apply_aug_image(self, image, pad=(0,0), **kwargs):
         image = F.pad(image, pad, self.mode, self.value)
         return image
@@ -342,27 +343,32 @@ class Pad(DualTransform):
             mask = mask[:,:,H-pad[0],W-pad[0]]
             return mask
     
-
     def apply_deaug_label(self, label, **kwargs):
         return label
 
     def apply_deaug_keypoints(self, keypoints, **kwargs):
-
         return F.keypoints_pad(keypoints,)
 
 
 class AdjustContrast(ImageOnlyTransform):
     ''''''
-    def __init__(self, contrast_factor):
+    identity_param = 0
+    def __init__(self, contrast_factor: List[int]):
+        if self.identity_param not in contrast_factor:
+            contrast_factor = [self.identity_param] + list(contrast_factor)
         super.__init__("contrast_factor", contrast_factor)
-    def apply_aug_image(self, image, contrast_factor=0.5, **kwarge):
+    def apply_aug_image(self, image, contrast_factor=0.5, **kwargs):
         return F.adjust_contrast(image, contrast_factor)
 
 
 class AdjustBrightness(ImageOnlyTransform):
     ''''''
-    def __init__(self, brightness_factor):
+    identity_param = 0
+    def __init__(self, brightness_factor: List[int]):
+        if self.identity_param not in brightness_factor:
+            brightness_factor = [self.identity_param] + list(brightness_factor)
         super.__init__("brightness_factor", brightness_factor)
-    def apply_aug_image(self, image, brightness_factor=0.5, **kwarge):
+        
+    def apply_aug_image(self, image, brightness_factor=0.5, **kwargs):
         return F.adjust_brightness(image, brightness_factor)
 

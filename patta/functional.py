@@ -168,14 +168,22 @@ def keypoints_rot90(keypoints, k=1):
 def adjust_contrast(x, contrast_factor=0.5):
     table = np.array([(i - 74) * contrast_factor + 74
                       for i in range(0, 256)]).clip(0, 255).astype('uint8')
-    return cv2.LUT(x, table)
+    x = x.numpy().clip(0,255).astype('uint8')
+    x = cv2.LUT(x, table)
+    x = x.astype(np.float32)
+    x = paddle.to_tensor(x)
+    return x
 
 
 
 def adjust_brightness(x, brightness_factor=1):
     table = np.array([i * brightness_factor
                       for i in range(0, 256)]).clip(0, 255).astype('uint8')
-    return cv2.LUT(x, table)
+    x = x.numpy().clip(0,255).astype('uint8')
+    x = cv2.LUT(x, table)
+    x = x.astype(np.float32)
+    x = paddle.to_tensor(x)
+    return x
 
 
 
