@@ -263,3 +263,122 @@ class FiveCrops(ImageOnlyTransform):
 
     def apply_deaug_keypoints(self, keypoints, **kwargs):
         raise ValueError("`FiveCrop` augmentation is not suitable for keypoints!")
+
+
+class HorizontallyShift(DualTransform):
+    """Roll the x tensor along the given axis(axes=3). """
+    identity_param = 0
+
+    def __init__(self,shifts:List[float]):
+        if self.identity_param not in shifts:
+            shifts = [self.identity_param] + list(shifts)
+        super().__init__("shifts",shifts)
+
+    def apply_aug_image(self, image, shifts=0, **kwargs):
+        image = F.hshift(image,shifts)
+        return image
+
+    def apply_deaug_mask(self, mask, shifts=0, **kwargs):
+        return self.apply_aug_image(mask,-shifts)
+
+    def apply_deaug_label(self, label, shifts=0, **kwargs):
+        return label
+
+    def apply_deaug_keypoints(self, keypoints, shifts=0, **kwargs):
+        return F.keypoints_hshift(keypoints,-shifts)
+
+
+class VerticalShift(DualTransform):
+    """Roll the x tensor along the given axis(axes=2). """
+    identity_param = 0
+
+    def __init__(self,shifts:List[float]):
+        if self.identity_param not in shifts:
+            shifts = [self.identity_param] + list(shifts)
+        super().__init__("shifts",shifts)
+
+    def apply_aug_image(self, image, shifts=0, **kwargs):
+        image = F.vshift(image,shifts)
+        return image
+
+    def apply_deaug_mask(self, mask, shifts=0, **kwargs):
+        return self.apply_aug_image(mask,-shifts)
+
+    def apply_deaug_label(self, label, shifts=0, **kwargs):
+        return label
+
+    def apply_deaug_keypoints(self, keypoints, shifts=0, **kwargs):
+        return F.keypoints_vshift(keypoints,-shifts)
+
+
+
+class Pad(DualTransform):
+    """Pad the picture. """
+    def __init__(
+        self, 
+        pads:List[Tuple[int, int]],
+        mode:str,
+        original_pad:Tuple[int, int] = None,
+        value:int=0):
+        if original_pad is None and original_pad not in pads:
+            pads = [original_pad] + list(pads)
+        self.original_pad = original_pad,
+        self.mode = mode,
+        self.value = value,
+        super().__init__()
+    def apply_aug_image(self, image, pad=(0,0), mode='constant', value=0, **kwargs):
+        image = F.pad(image, pad, mode, value)
+        return image
+
+    def apply_deaug_mask(self, mask, pad=(0,0), **kwargs):
+        if self.original_pad is None:
+            raise ValueError(
+                "Provide original image size to make mask backward transformation"
+            )
+        if pad != self.original_pad:
+            H = mask.shape[2]
+            W = mask.shape[3]
+            mask = mask[:,:,H-pad[0],W-pad[0]]
+            return mask
+    
+
+    def apply_deaug_label(self, label, **kwargs):
+        return label
+
+    def apply_deaug_keypoints(self, keypoints, **kwargs):
+
+        return F.keypoints_pad(keypoints,)
+
+
+class Adjust_Contrast(DualTransform):
+    ''''''
+    def __init__(self):
+        super.__init__()
+    def apply_aug_image(self, image, contrast_factor=0.5, **kwarge):
+        return F.adjust_contrast(image, contrast_factor)
+    
+    def apply_deaug_label(self, label, **kwargs):
+        return label
+    
+    def apply_deaug_mask(self, mask, **kwargs):
+        raise ValueError("`FiveCrop` augmentation is not suitable for mask!")
+
+    def apply_deaug_keypoints(self, keypoints, **kwargs):
+        raise ValueError("`FiveCrop` augmentation is not suitable for keypoints!")
+
+
+class Adjust_Brightness(DualTransform):
+    ''''''
+    def __init__(self):
+        super.__init__()
+    def apply_aug_image(self, image, brightness_factor=0.5, **kwarge):
+        return F.adjust_brightness(image, brightness_factor)
+    
+    def apply_deaug_label(self, label, **kwargs):
+        return label
+    
+    def apply_deaug_mask(self, mask, **kwargs):
+        raise ValueError("`FiveCrop` augmentation is not suitable for mask!")
+
+    def apply_deaug_keypoints(self, keypoints, **kwargs):
+        raise ValueError("`FiveCrop` augmentation is not suitable for keypoints!")

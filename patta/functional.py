@@ -1,6 +1,7 @@
 import paddle
 import paddle.nn.functional as F
 import numpy as np
+import cv2
 
 
 def rot90(x, k=1):
@@ -21,6 +22,14 @@ def hflip(x):
 def vflip(x):
     """flip batch of images vertically"""
     return x.flip([2])
+
+
+def hshift(x,shifts=0):
+    return paddle.roll(x, int(shifts*x.shape[3]), axis=3)
+
+
+def vshift(x,shifts=0):
+    return paddle.roll(x, int(shifts*x.shape[2]), axis=2)
 
 
 def sum(x1, x2):
@@ -124,6 +133,19 @@ def keypoints_vflip(keypoints):
     return _assemble_keypoints(x, 1. - y)
 
 
+def keypoints_hshift(keypoints,shifts):
+    x, y = _disassemble_keypoints(keypoints)
+    return _assemble_keypoints((x + shifts) % 1, y)
+
+
+def keypoints_vshift(keypoints,shifts):
+    x, y = _disassemble_keypoints(keypoints)
+    return _assemble_keypoints(x, (y + shifts) % 1)
+
+def keypoints_pad(keypoints,pad ):
+    x, y = _disassemble_keypoints(keypoints)
+    return _assemble_keypoints(x*x/(x+pad[0]), y*y/(y + pad[0]))
+
 def keypoints_rot90(keypoints, k=1):
 
     if k not in {0, 1, 2, 3}:
@@ -140,3 +162,33 @@ def keypoints_rot90(keypoints, k=1):
         xy = [1. - y, x]
 
     return _assemble_keypoints(*xy)
+
+
+
+def adjust_contrast(x,contrast_factor=0.5):
+    table = np.array([(i - 74) * contrast_factor + 74
+                      for i in range(0, 256)]).clip(0, 255).astype('uint8')
+    if len(x.shape) == 3 and x.shape[2] == 1:
+        return cv2.LUT(x, table)[:, :, np.newaxis]
+    else:
+        return cv2.LUT(x, table)
+
+
+
+def adjust_brightness(x,brightness_factor=1):
+    table = np.array([i * brightness_factor
+                      for i in range(0, 256)]).clip(0, 255).astype('uint8')
+
+    if len(x.shape) == 3 and x.shape[2] == 1:
+        return cv2.LUT(x, table)[:, :, np.newaxis]
+    else:
+        return cv2.LUT(x, table)
+
+
+def saturationtransform(x,value=1):
+    return x.transforms.SaturationTransform(value)
+
+
+def pad(x,pad=0,mode='constant',value=0):
+    return F.pad(x,pad,mode,value)
+
