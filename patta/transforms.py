@@ -267,6 +267,7 @@ class FiveCrops(ImageOnlyTransform):
 
 class HorizontallyShift(DualTransform):
     """Roll the x tensor along the given axis(axes=3). """
+
     identity_param = 0
 
     def __init__(self, shifts: List[float]):
@@ -290,6 +291,7 @@ class HorizontallyShift(DualTransform):
 
 class VerticalShift(DualTransform):
     """Roll the x tensor along the given axis(axes=2). """
+
     identity_param = 0
 
     def __init__(self, shifts: List[float]):
@@ -314,7 +316,9 @@ class VerticalShift(DualTransform):
 
 class Pad(DualTransform):
     """Pad the picture. """
+
     identity_param = 0
+
     def __init__(
         self, 
         pads:List[Tuple[int, int]],
@@ -353,6 +357,7 @@ class Pad(DualTransform):
 class AdjustContrast(ImageOnlyTransform):
     ''''''
     identity_param = 1
+
     def __init__(self, factors: List[int]):
         if self.identity_param not in factors:
             factors = [self.identity_param] + list(factors)
@@ -365,6 +370,7 @@ class AdjustContrast(ImageOnlyTransform):
 class AdjustBrightness(ImageOnlyTransform):
     ''''''
     identity_param = 1
+    
     def __init__(self, factors: List[int]):
         if self.identity_param not in factors:
             factors = [self.identity_param] + list(factors)
