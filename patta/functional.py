@@ -24,7 +24,7 @@ def vflip(x):
     return x.flip([2])
 
 
-def hshift(x,shifts=0):
+def hshift(x, shifts=0):
     return paddle.roll(x, int(shifts*x.shape[3]), axis=3)
 
 
@@ -168,27 +168,17 @@ def keypoints_rot90(keypoints, k=1):
 def adjust_contrast(x,contrast_factor=0.5):
     table = np.array([(i - 74) * contrast_factor + 74
                       for i in range(0, 256)]).clip(0, 255).astype('uint8')
-    if len(x.shape) == 3 and x.shape[2] == 1:
-        return cv2.LUT(x, table)[:, :, np.newaxis]
-    else:
-        return cv2.LUT(x, table)
+    return cv2.LUT(x, table)
 
 
 
-def adjust_brightness(x,brightness_factor=1):
+def adjust_brightness(x, brightness_factor=1):
     table = np.array([i * brightness_factor
                       for i in range(0, 256)]).clip(0, 255).astype('uint8')
-
-    if len(x.shape) == 3 and x.shape[2] == 1:
-        return cv2.LUT(x, table)[:, :, np.newaxis]
-    else:
-        return cv2.LUT(x, table)
+    return cv2.LUT(x, table)
 
 
-def saturationtransform(x,value=1):
-    return x.transforms.SaturationTransform(value)
 
-
-def pad(x,pad=0,mode='constant',value=0):
-    return F.pad(x,pad,mode,value)
+def pad(x, pad=0, mode='constant', value=0):
+    return F.pad(x, pad, mode, value)
 

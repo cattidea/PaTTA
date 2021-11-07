@@ -314,20 +314,21 @@ class VerticalShift(DualTransform):
 
 class Pad(DualTransform):
     """Pad the picture. """
+    identity_param = 0
     def __init__(
         self, 
         pads:List[Tuple[int, int]],
         mode:str,
         original_pad:Tuple[int, int] = None,
         value:int=0):
-        if original_pad is None and original_pad not in pads:
-            pads = [original_pad] + list(pads)
+        if self.identity_param not in pads:
+            pads = [self.identity_param] + list(pads)
         self.original_pad = original_pad,
         self.mode = mode,
         self.value = value,
-        super().__init__()
-    def apply_aug_image(self, image, pad=(0,0), mode='constant', value=0, **kwargs):
-        image = F.pad(image, pad, mode, value)
+        super().__init__("pads",pads)
+    def apply_aug_image(self, image, pad=(0,0), **kwargs):
+        image = F.pad(image, pad, self.mode, self.value)
         return image
 
     def apply_deaug_mask(self, mask, pad=(0,0), **kwargs):
@@ -350,35 +351,18 @@ class Pad(DualTransform):
         return F.keypoints_pad(keypoints,)
 
 
-class Adjust_Contrast(DualTransform):
+class AdjustContrast(ImageOnlyTransform):
     ''''''
-    def __init__(self):
-        super.__init__()
+    def __init__(self,contrast_factor):
+        super.__init__("contrast_factor",contrast_factor)
     def apply_aug_image(self, image, contrast_factor=0.5, **kwarge):
         return F.adjust_contrast(image, contrast_factor)
-    
-    def apply_deaug_label(self, label, **kwargs):
-        return label
-    
-    def apply_deaug_mask(self, mask, **kwargs):
-        raise ValueError("`FiveCrop` augmentation is not suitable for mask!")
-
-    def apply_deaug_keypoints(self, keypoints, **kwargs):
-        raise ValueError("`FiveCrop` augmentation is not suitable for keypoints!")
 
 
-class Adjust_Brightness(DualTransform):
+class AdjustBrightness(ImageOnlyTransform):
     ''''''
-    def __init__(self):
-        super.__init__()
+    def __init__(self,brightness_factor):
+        super.__init__("brightness_factor",brightness_factor)
     def apply_aug_image(self, image, brightness_factor=0.5, **kwarge):
         return F.adjust_brightness(image, brightness_factor)
-    
-    def apply_deaug_label(self, label, **kwargs):
-        return label
-    
-    def apply_deaug_mask(self, mask, **kwargs):
-        raise ValueError("`FiveCrop` augmentation is not suitable for mask!")
 
-    def apply_deaug_keypoints(self, keypoints, **kwargs):
-        raise ValueError("`FiveCrop` augmentation is not suitable for keypoints!")
