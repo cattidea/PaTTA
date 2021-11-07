@@ -40,6 +40,9 @@ def test_aug_deaug_mask(transform):
         tta.Resize(sizes=[(4, 5), (8, 10), (2, 2)], interpolation="nearest"),
         tta.AdjustBrightness(factors=[0.5, 1.0, 1.5]),
         tta.AdjustContrast(factors=[0.5, 1.0, 1.5]),
+        tta.AverageBlur(kernel_sizes=[(3, 3), (5, 3)]),
+        tta.GaussianBlur(kernel_sizes=[(3, 3), (5, 3)], sigma=0.3),
+        tta.Sharpen(kernel_sizes=[3]),
     ],
 )
 def test_label_is_same(transform):
