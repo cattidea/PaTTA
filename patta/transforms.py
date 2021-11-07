@@ -352,23 +352,23 @@ class Pad(DualTransform):
 
 class AdjustContrast(ImageOnlyTransform):
     ''''''
-    identity_param = 0
-    def __init__(self, contrast_factor: List[int]):
-        if self.identity_param not in contrast_factor:
-            contrast_factor = [self.identity_param] + list(contrast_factor)
-        super.__init__("contrast_factor", contrast_factor)
-    def apply_aug_image(self, image, contrast_factor=0.5, **kwargs):
-        return F.adjust_contrast(image, contrast_factor)
+    identity_param = 1
+    def __init__(self, factors: List[int]):
+        if self.identity_param not in factors:
+            factors = [self.identity_param] + list(factors)
+        super.__init__("contrast_factor", factors)
+    def apply_aug_image(self, image, factors=0.5, **kwargs):
+        return F.adjust_contrast(image, factors)
 
 
 class AdjustBrightness(ImageOnlyTransform):
     ''''''
-    identity_param = 0
-    def __init__(self, brightness_factor: List[int]):
-        if self.identity_param not in brightness_factor:
-            brightness_factor = [self.identity_param] + list(brightness_factor)
-        super.__init__("brightness_factor", brightness_factor)
-        
+    identity_param = 1
+    def __init__(self, factors: List[int]):
+        if self.identity_param not in factors:
+            factors = [self.identity_param] + list(factors)
+        super.__init__("brightness_factor", factors)
+
     def apply_aug_image(self, image, brightness_factor=0.5, **kwargs):
         return F.adjust_brightness(image, brightness_factor)
 
