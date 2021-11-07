@@ -58,6 +58,54 @@ class VerticalFlip(DualTransform):
         return keypoints
 
 
+class HorizontallyShift(DualTransform):
+    """Roll the x tensor along the given axis(axes=3). """
+
+    identity_param = 0
+
+    def __init__(self, shifts: List[float]):
+        if self.identity_param not in shifts:
+            shifts = [self.identity_param] + list(shifts)
+        super().__init__("shifts", shifts)
+
+    def apply_aug_image(self, image, shifts=0, **kwargs):
+        image = F.hshift(image, shifts)
+        return image
+
+    def apply_deaug_mask(self, mask, shifts=0, **kwargs):
+        return self.apply_aug_image(mask, -shifts)
+
+    def apply_deaug_label(self, label, shifts=0, **kwargs):
+        return label
+
+    def apply_deaug_keypoints(self, keypoints, shifts=0, **kwargs):
+        return F.keypoints_hshift(keypoints, -shifts)
+
+
+class VerticalShift(DualTransform):
+    """Roll the x tensor along the given axis(axes=2). """
+
+    identity_param = 0
+
+    def __init__(self, shifts: List[float]):
+        if self.identity_param not in shifts:
+            shifts = [self.identity_param] + list(shifts)
+        super().__init__("shifts", shifts)
+
+    def apply_aug_image(self, image, shifts=0, **kwargs):
+        image = F.vshift(image, shifts)
+        return image
+
+    def apply_deaug_mask(self, mask, shifts=0, **kwargs):
+        return self.apply_aug_image(mask, -shifts)
+
+    def apply_deaug_label(self, label, shifts=0, **kwargs):
+        return label
+
+    def apply_deaug_keypoints(self, keypoints, shifts=0, **kwargs):
+        return F.keypoints_vshift(keypoints, -shifts)
+
+
 class Rotate90(DualTransform):
     """Rotate images 0/90/180/270 degrees
 
@@ -265,55 +313,6 @@ class FiveCrops(ImageOnlyTransform):
         raise ValueError("`FiveCrop` augmentation is not suitable for keypoints!")
 
 
-class HorizontallyShift(DualTransform):
-    """Roll the x tensor along the given axis(axes=3). """
-
-    identity_param = 0
-
-    def __init__(self, shifts: List[float]):
-        if self.identity_param not in shifts:
-            shifts = [self.identity_param] + list(shifts)
-        super().__init__("shifts", shifts)
-
-    def apply_aug_image(self, image, shifts=0, **kwargs):
-        image = F.hshift(image, shifts)
-        return image
-
-    def apply_deaug_mask(self, mask, shifts=0, **kwargs):
-        return self.apply_aug_image(mask, -shifts)
-
-    def apply_deaug_label(self, label, shifts=0, **kwargs):
-        return label
-
-    def apply_deaug_keypoints(self, keypoints, shifts=0, **kwargs):
-        return F.keypoints_hshift(keypoints, -shifts)
-
-
-class VerticalShift(DualTransform):
-    """Roll the x tensor along the given axis(axes=2). """
-
-    identity_param = 0
-
-    def __init__(self, shifts: List[float]):
-        if self.identity_param not in shifts:
-            shifts = [self.identity_param] + list(shifts)
-        super().__init__("shifts", shifts)
-
-    def apply_aug_image(self, image, shifts=0, **kwargs):
-        image = F.vshift(image, shifts)
-        return image
-
-    def apply_deaug_mask(self, mask, shifts=0, **kwargs):
-        return self.apply_aug_image(mask, -shifts)
-
-    def apply_deaug_label(self, label, shifts=0, **kwargs):
-        return label
-
-    def apply_deaug_keypoints(self, keypoints, shifts=0, **kwargs):
-        return F.keypoints_vshift(keypoints, -shifts)
-
-
-
 class Pad(DualTransform):
     """Pad the picture. """
 
@@ -355,27 +354,43 @@ class Pad(DualTransform):
 
 
 class AdjustContrast(ImageOnlyTransform):
-    ''''''
-    identity_param = 1
+    """Adjusts contrast of an Image.
 
-    def __init__(self, factors: List[int]):
+    Args:
+        factors (List[float]): How much to adjust the contrast.
+    """
+
+    identity_param = 1.
+
+    def __init__(self, factors: List[float]):
+
         if self.identity_param not in factors:
             factors = [self.identity_param] + list(factors)
-        super.__init__("factors", factors)
+        super().__init__("factor", factors)
 
-    def apply_aug_image(self, image, factors=0.5, **kwargs):
-        return F.adjust_contrast(image, factors)
+    def apply_aug_image(self, image, factor=1., **kwargs):
+        if factor != self.identity_param:
+            return F.adjust_contrast(image, factor)
+        return image
 
 
 class AdjustBrightness(ImageOnlyTransform):
-    ''''''
-    identity_param = 1
+    """Adjusts brightness of an Image.
+
+    Args:
+        factors (List[float]): How much to adjust the brightness.
+    """
+
+    identity_param = 1.
     
-    def __init__(self, factors: List[int]):
+    def __init__(self, factors: List[float]):
+
         if self.identity_param not in factors:
             factors = [self.identity_param] + list(factors)
-        super.__init__("factors", factors)
+        super().__init__("factor", factors)
 
-    def apply_aug_image(self, image, factors=0.5, **kwargs):
-        return F.adjust_brightness(image, factors)
+    def apply_aug_image(self, image, factor=1., **kwargs):
+        if factor != self.identity_param:
+            return F.adjust_brightness(image, factor)
+        return image
 
