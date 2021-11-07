@@ -1,6 +1,7 @@
 import pytest
 import paddle
 import patta as tta
+from patta import transforms
 
 
 @pytest.mark.parametrize(
@@ -119,3 +120,59 @@ def test_resize_transform():
     for i, p in enumerate(transform.params):
         aug = transform.apply_aug_image(a, **{transform.pname: p})
         assert paddle.allclose(aug.reshape((aug.shape[-2], aug.shape[-1])), paddle.to_tensor(output[i], paddle.float32))
+
+
+
+def test_AdjustBrightness_transform():
+    transform = tta.AdjustBrightness(factors=[0.5, 1.5])
+    a = paddle.arange(48).reshape((1, 3, 4, 4)).astype(paddle.float32)
+    output = [
+        [[[0. , 1. , 2. , 3. ],
+            [4. , 5. , 6. , 7. ],
+            [8. , 9. , 10., 11.],
+            [12., 13., 14., 15.]],
+
+            [[16., 17., 18., 19.],
+            [20., 21., 22., 23.],
+            [24., 25., 26., 27.],
+            [28., 29., 30., 31.]],
+
+            [[32., 33., 34., 35.],
+            [36., 37., 38., 39.],
+            [40., 41., 42., 43.],
+            [44., 45., 46., 47.]]],
+        [[[0. , 0. , 1. , 1. ],
+            [2. , 2. , 3. , 3. ],
+            [4. , 4. , 5. , 5. ],
+            [6. , 6. , 7. , 7. ]],
+
+            [[8. , 8. , 9. , 9. ],
+            [10., 10., 11., 11.],
+            [12., 12., 13., 13.],
+            [14., 14., 15., 15.]],
+
+            [[16., 16., 17., 17.],
+            [18., 18., 19., 19.],
+            [20., 20., 21., 21.],
+            [22., 22., 23., 23.]]],
+
+        [[[0. , 1. , 3. , 4. ],
+            [6. , 7. , 9. , 10.],
+            [12., 13., 15., 16.],
+            [18., 19., 21., 22.]],
+
+            [[24., 25., 27., 28.],
+            [30., 31., 33., 34.],
+            [36., 37., 39., 40.],
+            [42., 43., 45., 46.]],
+
+            [[48., 49., 51., 52.],
+            [54., 55., 57., 58.],
+            [60., 61., 63., 64.],
+            [66., 67., 69., 70.]]]
+            ]    
+    for i, p in enumerate(transform.params):
+        aug = transform.apply_aug_image(a, **{transform.pname: p})
+        assert paddle.allclose(aug.reshape((aug.shape[-3], aug.shape[-2], aug.shape[-1])), paddle.to_tensor(output[i], paddle.float32))
+
+
