@@ -58,7 +58,7 @@ class VerticalFlip(DualTransform):
         return keypoints
 
 
-class HorizontallyShift(DualTransform):
+class HorizontalShift(DualTransform):
     """Roll the x tensor along the given axis(axes=3). """
 
     identity_param = 0
