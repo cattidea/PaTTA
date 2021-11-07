@@ -356,7 +356,8 @@ class AdjustContrast(ImageOnlyTransform):
     def __init__(self, factors: List[int]):
         if self.identity_param not in factors:
             factors = [self.identity_param] + list(factors)
-        super.__init__("contrast_factor", factors)
+        super.__init__("factors", factors)
+
     def apply_aug_image(self, image, factors=0.5, **kwargs):
         return F.adjust_contrast(image, factors)
 
@@ -367,8 +368,8 @@ class AdjustBrightness(ImageOnlyTransform):
     def __init__(self, factors: List[int]):
         if self.identity_param not in factors:
             factors = [self.identity_param] + list(factors)
-        super.__init__("brightness_factor", factors)
+        super.__init__("factors", factors)
 
-    def apply_aug_image(self, image, brightness_factor=0.5, **kwargs):
-        return F.adjust_brightness(image, brightness_factor)
+    def apply_aug_image(self, image, factors=0.5, **kwargs):
+        return F.adjust_brightness(image, factors)
 
