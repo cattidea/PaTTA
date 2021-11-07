@@ -28,7 +28,7 @@ def hshift(x, shifts=0):
     return paddle.roll(x, int(shifts*x.shape[3]), axis=3)
 
 
-def vshift(x,shifts=0):
+def vshift(x, shifts=0):
     return paddle.roll(x, int(shifts*x.shape[2]), axis=2)
 
 
@@ -133,16 +133,16 @@ def keypoints_vflip(keypoints):
     return _assemble_keypoints(x, 1. - y)
 
 
-def keypoints_hshift(keypoints,shifts):
+def keypoints_hshift(keypoints, shifts):
     x, y = _disassemble_keypoints(keypoints)
     return _assemble_keypoints((x + shifts) % 1, y)
 
 
-def keypoints_vshift(keypoints,shifts):
+def keypoints_vshift(keypoints, shifts):
     x, y = _disassemble_keypoints(keypoints)
     return _assemble_keypoints(x, (y + shifts) % 1)
 
-def keypoints_pad(keypoints,pad ):
+def keypoints_pad(keypoints, pad ):
     x, y = _disassemble_keypoints(keypoints)
     return _assemble_keypoints(x*x/(x+pad[0]), y*y/(y + pad[0]))
 
@@ -165,7 +165,7 @@ def keypoints_rot90(keypoints, k=1):
 
 
 
-def adjust_contrast(x,contrast_factor=0.5):
+def adjust_contrast(x, contrast_factor=0.5):
     table = np.array([(i - 74) * contrast_factor + 74
                       for i in range(0, 256)]).clip(0, 255).astype('uint8')
     return cv2.LUT(x, table)

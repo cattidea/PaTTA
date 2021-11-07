@@ -269,46 +269,46 @@ class HorizontallyShift(DualTransform):
     """Roll the x tensor along the given axis(axes=3). """
     identity_param = 0
 
-    def __init__(self,shifts:List[float]):
+    def __init__(self, shifts: List[float]):
         if self.identity_param not in shifts:
             shifts = [self.identity_param] + list(shifts)
-        super().__init__("shifts",shifts)
+        super().__init__("shifts", shifts)
 
     def apply_aug_image(self, image, shifts=0, **kwargs):
-        image = F.hshift(image,shifts)
+        image = F.hshift(image, shifts)
         return image
 
     def apply_deaug_mask(self, mask, shifts=0, **kwargs):
-        return self.apply_aug_image(mask,-shifts)
+        return self.apply_aug_image(mask, -shifts)
 
     def apply_deaug_label(self, label, shifts=0, **kwargs):
         return label
 
     def apply_deaug_keypoints(self, keypoints, shifts=0, **kwargs):
-        return F.keypoints_hshift(keypoints,-shifts)
+        return F.keypoints_hshift(keypoints, -shifts)
 
 
 class VerticalShift(DualTransform):
     """Roll the x tensor along the given axis(axes=2). """
     identity_param = 0
 
-    def __init__(self,shifts:List[float]):
+    def __init__(self, shifts: List[float]):
         if self.identity_param not in shifts:
             shifts = [self.identity_param] + list(shifts)
-        super().__init__("shifts",shifts)
+        super().__init__("shifts", shifts)
 
     def apply_aug_image(self, image, shifts=0, **kwargs):
-        image = F.vshift(image,shifts)
+        image = F.vshift(image, shifts)
         return image
 
     def apply_deaug_mask(self, mask, shifts=0, **kwargs):
-        return self.apply_aug_image(mask,-shifts)
+        return self.apply_aug_image(mask, -shifts)
 
     def apply_deaug_label(self, label, shifts=0, **kwargs):
         return label
 
     def apply_deaug_keypoints(self, keypoints, shifts=0, **kwargs):
-        return F.keypoints_vshift(keypoints,-shifts)
+        return F.keypoints_vshift(keypoints, -shifts)
 
 
 
@@ -353,16 +353,16 @@ class Pad(DualTransform):
 
 class AdjustContrast(ImageOnlyTransform):
     ''''''
-    def __init__(self,contrast_factor):
-        super.__init__("contrast_factor",contrast_factor)
+    def __init__(self, contrast_factor):
+        super.__init__("contrast_factor", contrast_factor)
     def apply_aug_image(self, image, contrast_factor=0.5, **kwarge):
         return F.adjust_contrast(image, contrast_factor)
 
 
 class AdjustBrightness(ImageOnlyTransform):
     ''''''
-    def __init__(self,brightness_factor):
-        super.__init__("brightness_factor",brightness_factor)
+    def __init__(self, brightness_factor):
+        super.__init__("brightness_factor", brightness_factor)
     def apply_aug_image(self, image, brightness_factor=0.5, **kwarge):
         return F.adjust_brightness(image, brightness_factor)
 
