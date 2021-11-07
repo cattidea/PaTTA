@@ -25,10 +25,12 @@ def vflip(x):
 
 
 def hshift(x, shifts=0):
+    """shift batch of images horizontally"""
     return paddle.roll(x, int(shifts*x.shape[3]), axis=3)
 
 
 def vshift(x, shifts=0):
+    """shift batch of images vertically"""
     return paddle.roll(x, int(shifts*x.shape[2]), axis=2)
 
 
@@ -113,6 +115,38 @@ def center_crop(x, crop_h, crop_w):
     return x[:, :, y_min:y_max, x_min:x_max]
 
 
+def adjust_contrast(x, contrast_factor: float=1.):
+    """adjusts contrast for batch of images"""
+    table = np.array([(i - 74) * contrast_factor + 74
+                      for i in range(0, 256)]).clip(0, 255).astype(np.uint8)
+    try:
+        x = x.paddle.to_tensor(x).numpy()
+    except:
+        x = x.numpy()
+    x = x.clip(0,255).astype(np.uint8)
+    x = cv2.LUT(x, table)
+    x = x.astype(np.float32)
+    return paddle.to_tensor(x)
+
+
+def adjust_brightness(x, brightness_factor: float=1.):
+    """adjusts brightness for batch of images"""
+    table = np.array([i * brightness_factor
+                      for i in range(0, 256)]).clip(0, 255).astype(np.uint8)
+    try:
+        x = x.paddle.to_tensor(x).numpy()
+    except:
+        x = x.numpy()
+    x = x.clip(0,255).astype(np.uint8)
+    x = cv2.LUT(x, table)
+    x = x.astype(np.float32)
+    return paddle.to_tensor(x)
+
+
+def pad(x, pad=0, mode='constant', value=0):
+    return F.pad(x, pad, mode, value)
+
+
 def _disassemble_keypoints(keypoints):
     x = keypoints[:, 0]
     y = keypoints[:, 1]
@@ -162,37 +196,3 @@ def keypoints_rot90(keypoints, k=1):
         xy = [1. - y, x]
 
     return _assemble_keypoints(*xy)
-
-
-
-def adjust_contrast(x, contrast_factor=0.5):
-    table = np.array([(i - 74) * contrast_factor + 74
-                      for i in range(0, 256)]).clip(0, 255).astype(np.uint8)
-    try:
-        x = x.paddle.to_tensor(x).numpy()
-    except:
-        x = x.numpy()
-    x = x.clip(0,255).astype(np.uint8)
-    x = cv2.LUT(x, table)
-    x = x.astype(np.float32)
-    return paddle.to_tensor(x)
-
-
-
-def adjust_brightness(x, brightness_factor=1):
-    table = np.array([i * brightness_factor
-                      for i in range(0, 256)]).clip(0, 255).astype(np.uint8)
-    try:
-        x = x.paddle.to_tensor(x).numpy()
-    except:
-        x = x.numpy()
-    x = x.clip(0,255).astype(np.uint8)
-    x = cv2.LUT(x, table)
-    x = x.astype(np.float32)
-    return paddle.to_tensor(x)
-
-
-
-def pad(x, pad=0, mode='constant', value=0):
-    return F.pad(x, pad, mode, value)
-
