@@ -59,7 +59,7 @@ class VerticalFlip(DualTransform):
 
 
 class HorizontalShift(DualTransform):
-    """Roll the x tensor along the given axis(axes=3). """
+    """Shift images horizontally (left->right)"""
 
     identity_param = 0
 
@@ -83,7 +83,7 @@ class HorizontalShift(DualTransform):
 
 
 class VerticalShift(DualTransform):
-    """Roll the x tensor along the given axis(axes=2). """
+    """Shift images vertically (up->down)"""
 
     identity_param = 0
 
@@ -311,46 +311,6 @@ class FiveCrops(ImageOnlyTransform):
 
     def apply_deaug_keypoints(self, keypoints, **kwargs):
         raise ValueError("`FiveCrop` augmentation is not suitable for keypoints!")
-
-
-class Pad(DualTransform):
-    """Pad the picture. """
-
-    identity_param = 0
-
-    def __init__(
-        self, 
-        pads:List[Tuple[int, int]],
-        mode:str,
-        original_pad:Tuple[int, int] = None,
-        value:int=0):
-        if self.identity_param not in pads:
-            pads = [self.identity_param] + list(pads)
-        self.original_pad = original_pad,
-        self.mode = mode,
-        self.value = value,
-        super().__init__("pads",pads)
-
-    def apply_aug_image(self, image, pad=(0,0), **kwargs):
-        image = F.pad(image, pad, self.mode, self.value)
-        return image
-
-    def apply_deaug_mask(self, mask, pad=(0,0), **kwargs):
-        if self.original_pad is None:
-            raise ValueError(
-                "Provide original image size to make mask backward transformation"
-            )
-        if pad != self.original_pad:
-            H = mask.shape[2]
-            W = mask.shape[3]
-            mask = mask[:,:,H-pad[0],W-pad[0]]
-            return mask
-    
-    def apply_deaug_label(self, label, **kwargs):
-        return label
-
-    def apply_deaug_keypoints(self, keypoints, **kwargs):
-        return F.keypoints_pad(keypoints,)
 
 
 class AdjustContrast(ImageOnlyTransform):

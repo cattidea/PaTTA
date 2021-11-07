@@ -16,7 +16,6 @@ from .transforms import (
     Multiply,
     FiveCrops,
     Resize,
-    Pad,
     AdjustContrast,
     AdjustBrightness,
 )

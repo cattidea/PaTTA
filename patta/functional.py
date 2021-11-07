@@ -117,8 +117,10 @@ def center_crop(x, crop_h, crop_w):
 
 def adjust_contrast(x, contrast_factor: float=1.):
     """adjusts contrast for batch of images"""
-    table = np.array([(i - 74) * contrast_factor + 74
-                      for i in range(0, 256)]).clip(0, 255).astype(np.uint8)
+    table = np.array([
+        (i - 74) * contrast_factor + 74
+        for i in range(0, 256)
+    ]).clip(0, 255).astype(np.uint8)
     try:
         x = x.paddle.to_tensor(x).numpy()
     except:
@@ -131,8 +133,10 @@ def adjust_contrast(x, contrast_factor: float=1.):
 
 def adjust_brightness(x, brightness_factor: float=1.):
     """adjusts brightness for batch of images"""
-    table = np.array([i * brightness_factor
-                      for i in range(0, 256)]).clip(0, 255).astype(np.uint8)
+    table = np.array([
+        i * brightness_factor
+        for i in range(0, 256)
+    ]).clip(0, 255).astype(np.uint8)
     try:
         x = x.paddle.to_tensor(x).numpy()
     except:
@@ -141,10 +145,6 @@ def adjust_brightness(x, brightness_factor: float=1.):
     x = cv2.LUT(x, table)
     x = x.astype(np.float32)
     return paddle.to_tensor(x)
-
-
-def pad(x, pad=0, mode='constant', value=0):
-    return F.pad(x, pad, mode, value)
 
 
 def _disassemble_keypoints(keypoints):
@@ -176,9 +176,6 @@ def keypoints_vshift(keypoints, shifts):
     x, y = _disassemble_keypoints(keypoints)
     return _assemble_keypoints(x, (y + shifts) % 1)
 
-def keypoints_pad(keypoints, pad ):
-    x, y = _disassemble_keypoints(keypoints)
-    return _assemble_keypoints(x*x/(x+pad[0]), y*y/(y + pad[0]))
 
 def keypoints_rot90(keypoints, k=1):
 
